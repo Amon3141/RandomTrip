@@ -1,0 +1,2 @@
+# Optional: for scripts/record_randomtrip_demo.py (Playwright screen recording)
+playwright>=1.40.0
