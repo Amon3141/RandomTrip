@@ -142,5 +142,11 @@ LOGOUT_REDIRECT_URL = "randomtrip:roulette"
 
 try:
     from .local_settings import *
-except:
+except ImportError:
     pass
+
+# When DEBUG is True, secure session/CSRF cookies are not sent over http://, so
+# local runserver and automation against 127.0.0.1 fail login and API POSTs.
+if DEBUG:
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Full X11 screen capture with pointer (ffmpeg) + Chrome + xdotool for RandomTrip.
-# Prereq: create config/local_settings.py with CSRF/SESSION _SECURE = False
-#   (or rely on settings that allow cookies on http for local dev)
+# Requires http:// (runserver) so session cookies are accepted (see DEBUG cookie
+# settings in config/settings.py) or a local local_settings override.
 set -euo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO"
@@ -77,23 +77,20 @@ xdotool mousemove --sync "$((X+400))" "$((Y+200))" click 1
 sleep 0.2
 
 eval "$(xdotool getwindowgeometry --shell "$WID")"
-# $X $Y $WIDTH $HEIGHT
-# Centered form: right-aligned inputs; click username box (relative to content)
-UX=$((X + 820))
+# $X $Y $WIDTH $HEIGHT — form is main-centered, inputs end-aligned; ~70% from left, mid column
+# (previous fixed offsets were too far right and missed the fields)
+UX=$((X + WIDTH * 7 / 10))
 UY=$((Y + 300))
-# Password field lower
-PY=$((Y + 390))
-# Log In button
-BX=$((X + 920))
-BY=$((Y + 470))
 
 xdotool mousemove --sync "$UX" "$UY" click 1
-sleep 0.15
-xdotool type --delay 12 -- "$DEMO_USER"
-xdotool mousemove --sync "$((X+820))" "$PY" click 1
-xdotool type --delay 12 -- "$DEMO_PASS"
-xdotool mousemove --sync "$BX" "$BY" click 1
-sleep 2.8
+sleep 0.25
+xdotool type --clearmodifiers --delay 10 -- "$DEMO_USER"
+xdotool key --clearmodifiers Tab
+xdotool type --clearmodifiers --delay 10 -- "$DEMO_PASS"
+xdotool key --clearmodifiers Return
+# Wait for redirect to roulette
+sleep 3.5
+eval "$(xdotool getwindowgeometry --shell "$WID")"
 
 # Page zoom: Ctrl+ / Ctrl- (key plus/minus, not numpad - works in Chrome)
 for _ in 1 2; do xdotool key --delay 250 ctrl+plus; sleep 0.4; done
